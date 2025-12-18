@@ -1,0 +1,37 @@
+# Dependencies
+node_modules
+/coverage
+
+# Testing
+.nyc_output
+/benchmarks/graphs
+
+# Optional npm cache files
+.npm
+
+# Output of 'npm pack'
+*.tgz
+
+# dotenv environment variables file
+.env
+.env.development
+.env.test
+.env.production
+
+# Logs
+*.log
+npm-debug.log*
+
+# Yarn lock files
+# yarn-error.log
+# .pnp
+# .pnp.js
+
+# Editor/OS files
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Build/Dist folders (if applicable)
+/dist
+/build
