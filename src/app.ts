@@ -19,6 +19,9 @@ app.get('/', (req: Request, res: Response) => {
   res.send('API is running...');
 });
 
+import authRoutes from './routes/auth.routes';
+app.use('/api/auth', authRoutes);
+
 app.use(notFound);
 app.use(errorHandler);
 
