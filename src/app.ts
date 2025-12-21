@@ -20,7 +20,10 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 import authRoutes from './routes/auth.routes';
+import residentRoutes from './routes/resident.routes';
+
 app.use('/api/auth', authRoutes);
+app.use('/api/residents', residentRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
