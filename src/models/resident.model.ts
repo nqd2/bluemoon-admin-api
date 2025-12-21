@@ -18,7 +18,7 @@ const ResidentSchema: Schema = new Schema(
     identityCard: { type: String, required: true, unique: true },
     hometown: { type: String, required: true },
     job: { type: String, required: true },
-    apartmentId: { type: String },
+    apartmentId: { type: Schema.Types.ObjectId, ref: 'Apartment' },
   },
   {
     timestamps: true,

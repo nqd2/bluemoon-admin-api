@@ -51,3 +51,32 @@ export const createResident = async (req: Request, res: Response, next: NextFunc
     next(error);
   }
 };
+
+export const getResidents = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const keywordInput = req.query.keyword as string;
+    const keyword = keywordInput ? {
+      fullName: {
+        $regex: keywordInput,
+        $options: 'i',
+      },
+    } : {};
+
+    const count = await Resident.countDocuments({ ...keyword });
+    const residents = await Resident.find({ ...keyword })
+      .limit(limit)
+      .skip(limit * (page - 1))
+      .populate('apartmentId', 'name');
+
+    res.json({
+      residents,
+      page,
+      pages: Math.ceil(count / limit),
+      total: count,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
