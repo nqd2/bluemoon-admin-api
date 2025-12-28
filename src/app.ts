@@ -36,10 +36,16 @@ app.get('/', (req: Request, res: Response) => {
 import authRoutes from './routes/auth.routes';
 import residentRoutes from './routes/resident.routes';
 import apartmentRoutes from './routes/apartment.routes';
+import feeRoutes from './routes/fee.routes';
+import transactionRoutes from './routes/transaction.routes';
+import statsRoutes from './routes/stats.routes';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/residents', residentRoutes);
 app.use('/api/apartments', apartmentRoutes);
+app.use('/api/fees', feeRoutes);
+app.use('/api/transactions', transactionRoutes);
+app.use('/api/stats', statsRoutes);
 
 // Error Handlers
 app.use(notFound);

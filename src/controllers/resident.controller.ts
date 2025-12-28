@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import Resident from '../models/resident.model';
+import Apartment from '../models/apartment.model';
 
 /**
  * Create Resident
@@ -265,29 +266,30 @@ export const deleteResident = async (req: Request, res: Response, next: NextFunc
       return;
     }
 
-    // TODO: Check if resident is owner of any apartment
-    // This will be implemented when Apartment model is created
-    // For now, we'll add a placeholder comment
+    // Check if resident is owner of any apartment
+    const apartment = await Apartment.findOne({ 
+      $or: [
+        { ownerId: id },
+        { 'members': { $elemMatch: { $eq: id } } } // Checking members too? Requirement only says 'Chủ hộ' (Owner)
+      ]
+    });
     
-    // Future implementation:
-    // const apartment = await Apartment.findOne({ 
-    //   $or: [
-    //     { ownerId: id },
-    //     { 'residents': { $elemMatch: { residentId: id, role: 'Chủ hộ' } } }
-    //   ]
-    // });
-    // 
-    // if (apartment) {
-    //   res.status(400).json({
-    //     success: false,
-    //     message: 'Cannot delete resident who is an apartment owner. Please change the apartment owner first.',
-    //     apartmentInfo: {
-    //       apartmentNumber: apartment.apartmentNumber,
-    //       building: apartment.building
-    //     }
-    //   });
-    //   return;
-    // }
+    // BE-06 says: "Nếu cư dân là Chủ hộ (role trong Apartment là 'Chủ hộ' hoặc ownerId trỏ tới user này)"
+    // The Apartment model seems to have `ownerId`.
+    // Let's check Apartment model definition to be sure.
+    const apartmentOwner = await Apartment.findOne({ ownerId: id });
+    
+    if (apartmentOwner) {
+      res.status(400).json({
+        success: false,
+        message: 'Cannot delete resident who is an apartment owner. Please change the apartment owner first.',
+        apartmentInfo: {
+          apartmentNumber: apartmentOwner.apartmentNumber,
+          building: apartmentOwner.building
+        }
+      });
+      return;
+    }
 
     // Hard Delete (MVP version)
     await Resident.findByIdAndDelete(id);
