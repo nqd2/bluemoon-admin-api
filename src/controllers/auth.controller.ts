@@ -17,9 +17,9 @@ const generateToken = (id: string, email: string, role: string): string => {
   
   return jwt.sign(
     { id, email, role }, 
-    process.env.JWT_SECRET, 
+    process.env.JWT_SECRET as string, 
     {
-      expiresIn: process.env.JWT_EXPIRE || '30d',
+      expiresIn: (process.env.JWT_EXPIRE || '30d') as any, // Cast to any to avoid complex type checking issues
     }
   );
 };
@@ -35,12 +35,8 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
 
     // Validation Schema with Zod
     const loginSchema = z.object({
-      email: z.string({
-        required_error: 'Email is required'
-      }).email('Invalid email format'),
-      password: z.string({
-        required_error: 'Password is required'
-      }).min(1, 'Password cannot be empty'),
+      email: z.string().min(1, 'Email is required').email('Invalid email format'),
+      password: z.string().min(1, 'Password is required'),
     });
 
     // Validate input
@@ -50,7 +46,7 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
       res.status(400).json({
         success: false,
         message: 'Validation failed',
-        errors: validation.error.errors.map(err => ({
+        errors: validation.error.issues.map((err: any) => ({
           field: err.path[0],
           message: err.message
         }))
