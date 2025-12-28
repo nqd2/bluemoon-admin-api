@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import Apartment from '../models/apartment.model';
 import Resident from '../models/resident.model';
+import mongoose from 'mongoose';
 
 /**
  * Create Apartment
@@ -94,6 +95,153 @@ export const createApartment = async (req: Request, res: Response, next: NextFun
       success: true,
       message: 'Apartment created successfully',
       data: populatedApartment
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Add Member to Apartment
+ * Thêm một nhân khẩu vào một căn hộ
+ * 
+ * @route   POST /api/apartments/:id/members
+ * @access  Private (requires authentication)
+ */
+export const addMember = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { residentId, role } = req.body;
+
+    // Validate inputs
+    if (!id.match(/^[0-9a-fA-F]{24}$/) || !residentId.match(/^[0-9a-fA-F]{24}$/)) {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid ID format'
+      });
+      return;
+    }
+
+    if (!['Chủ hộ', 'Thành viên'].includes(role)) {
+      res.status(400).json({
+        success: false,
+        message: 'Role must be "Chủ hộ" or "Thành viên"'
+      });
+      return;
+    }
+
+    // Check apartment existence
+    const apartment = await Apartment.findById(id);
+    if (!apartment) {
+      res.status(404).json({
+        success: false,
+        message: 'Apartment not found'
+      });
+      return;
+    }
+
+    // Check resident existence
+    const resident = await Resident.findById(residentId);
+    if (!resident) {
+      res.status(404).json({
+        success: false,
+        message: 'Resident not found'
+      });
+      return;
+    }
+
+    // Check if resident already belongs to another apartment
+    if (resident.apartmentId && resident.apartmentId.toString() !== id) {
+      res.status(400).json({
+        success: false,
+        message: 'Resident already belongs to another apartment'
+      });
+      return;
+    }
+
+    // Check Owner constraint
+    if (role === 'Chủ hộ') {
+      if (apartment.ownerId && apartment.ownerId.toString() !== residentId) {
+        res.status(400).json({
+          success: false,
+          message: 'Apartment already has an owner. Only one owner is allowed.'
+        });
+        return;
+      }
+    }
+
+    // Update Resident
+    resident.apartmentId = id;
+    resident.roleInApartment = role;
+    await resident.save();
+
+    // Update Apartment
+    if (!apartment.members) apartment.members = [];
+    
+    // Add to members list if not already there
+    if (!apartment.members.some(m => m.toString() === residentId)) {
+      apartment.members.push(new mongoose.Types.ObjectId(residentId));
+    }
+
+    // Update ownerId if role is Owner
+    if (role === 'Chủ hộ') {
+      apartment.ownerId = new mongoose.Types.ObjectId(residentId);
+    }
+
+    await apartment.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Member added successfully',
+      data: {
+        apartmentId: id,
+        residentId: residentId,
+        role: role
+      }
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Get Apartment Details
+ * Lấy thông tin chi tiết của một căn hộ, bao gồm chủ hộ và danh sách thành viên
+ * 
+ * @route   GET /api/apartments/:id
+ * @access  Private (requires authentication)
+ */
+export const getApartmentDetails = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    // Validate MongoDB ObjectId
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid apartment ID format'
+      });
+      return;
+    }
+
+    // Find apartment and populate owner and members
+    const apartment = await Apartment.findById(id)
+      .populate('ownerId', 'fullName identityCard phone email dob gender hometown job')
+      .populate('members', 'fullName identityCard items dob gender relationship roleInApartment');
+
+    if (!apartment) {
+      res.status(404).json({
+        success: false,
+        message: 'Apartment not found'
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      data: apartment
     });
 
   } catch (error) {
