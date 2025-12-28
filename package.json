@@ -1,20 +1,29 @@
 {
   "name": "bluemoon-admin-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "BlueMoon Apartment Management System - Backend API",
   "main": "dist/server.js",
   "scripts": {
     "start": "node dist/server.js",
     "dev": "nodemon src/server.ts",
     "build": "tsc",
+    "lint": "echo \"Add ESLint later\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nqd2/bluemoon-admin-api.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "apartment",
+    "management",
+    "api",
+    "nodejs",
+    "typescript",
+    "express",
+    "mongodb"
+  ],
+  "author": "Nguyễn Quý Đức",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/nqd2/bluemoon-admin-api/issues"
