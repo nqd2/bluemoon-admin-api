@@ -1,0 +1,320 @@
+{
+  "info": {
+    "name": "BlueMoon Admin API",
+    "description": "API Collection for BlueMoon Apartment Management System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/",
+          "host": ["{{baseUrl}}"],
+          "path": [""]
+        },
+        "description": "Check if API is running"
+      },
+      "response": []
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('token', jsonData.data.token);",
+                  "    console.log('Token saved:', jsonData.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@bluemoon.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Admin login - returns JWT token"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Residents",
+      "item": [
+        {
+          "name": "Create Resident",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Nguyen Van A\",\n  \"dob\": \"1990-01-01\",\n  \"gender\": \"Nam\",\n  \"identityCard\": \"001090000001\",\n  \"hometown\": \"Ha Noi\",\n  \"job\": \"Ky su\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/residents",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "residents"]
+            },
+            "description": "Create a new resident"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Residents List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/residents?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "residents"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                },
+                {
+                  "key": "keyword",
+                  "value": "",
+                  "description": "Search keyword (fullName or identityCard)",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get paginated list of residents with optional search"
+          },
+          "response": []
+        },
+        {
+          "name": "Search Residents",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/residents?keyword=Nguyen",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "residents"],
+              "query": [
+                {
+                  "key": "keyword",
+                  "value": "Nguyen",
+                  "description": "Search by name or identity card"
+                }
+              ]
+            },
+            "description": "Search residents by keyword (fullName or identityCard)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Resident",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Nguyen Van A Updated\",\n  \"job\": \"Giam doc\",\n  \"status\": \"Tạm trú\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/residents/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "residents", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "RESIDENT_ID_HERE",
+                  "description": "Resident MongoDB ObjectId"
+                }
+              ]
+            },
+            "description": "Update resident information (partial update)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Resident",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/residents/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "residents", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "RESIDENT_ID_HERE",
+                  "description": "Resident MongoDB ObjectId"
+                }
+              ]
+            },
+            "description": "Delete a resident (hard delete)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Apartments",
+      "item": [
+        {
+          "name": "Create Apartment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"P101\",\n  \"area\": 80.5,\n  \"apartmentNumber\": \"101\",\n  \"building\": \"A\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/apartments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "apartments"]
+            },
+            "description": "Create a new apartment"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Apartment with Owner",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"P102\",\n  \"area\": 95.0,\n  \"ownerId\": \"RESIDENT_ID_HERE\",\n  \"apartmentNumber\": \"102\",\n  \"building\": \"A\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/apartments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "apartments"]
+            },
+            "description": "Create apartment with owner assigned"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ]
+}
+
