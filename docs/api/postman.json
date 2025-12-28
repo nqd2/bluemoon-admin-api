@@ -3,7 +3,7 @@
     "name": "BlueMoon Admin API",
     "description": "API Collection for BlueMoon Apartment Management System",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "version": "1.0.0"
+    "version": "1.1.0"
   },
   "variable": [
     {
@@ -44,8 +44,8 @@
                 "exec": [
                   "if (pm.response.code === 200) {",
                   "    var jsonData = pm.response.json();",
-                  "    pm.collectionVariables.set('token', jsonData.data.token);",
-                  "    console.log('Token saved:', jsonData.data.token);",
+                  "    pm.collectionVariables.set('token', jsonData.token);",
+                  "    console.log('Token saved:', jsonData.token);",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -62,7 +62,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@bluemoon.com\",\n  \"password\": \"admin123\"\n}"
+              "raw": "{\n  \"email\": \"admin@test.com\",\n  \"password\": \"password123\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/auth/login",
@@ -82,19 +82,15 @@
           "name": "Create Resident",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"fullName\": \"Nguyen Van A\",\n  \"dob\": \"1990-01-01\",\n  \"gender\": \"Nam\",\n  \"identityCard\": \"001090000001\",\n  \"hometown\": \"Ha Noi\",\n  \"job\": \"Ky su\"\n}"
+              "raw": "{\n  \"fullName\": \"Nguyen Van A\",\n  \"dob\": \"1990-01-01\",\n  \"gender\": \"Nam\",\n  \"identityCard\": \"001090000001\",\n  \"hometown\": \"Ha Noi\",\n  \"job\": \"Ky su\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/residents",
@@ -109,12 +105,7 @@
           "name": "Get Residents List",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/residents?page=1&limit=10",
               "host": ["{{baseUrl}}"],
@@ -143,48 +134,18 @@
           "response": []
         },
         {
-          "name": "Search Residents",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/residents?keyword=Nguyen",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "residents"],
-              "query": [
-                {
-                  "key": "keyword",
-                  "value": "Nguyen",
-                  "description": "Search by name or identity card"
-                }
-              ]
-            },
-            "description": "Search residents by keyword (fullName or identityCard)"
-          },
-          "response": []
-        },
-        {
           "name": "Update Resident",
           "request": {
             "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"fullName\": \"Nguyen Van A Updated\",\n  \"job\": \"Giam doc\",\n  \"status\": \"Tạm trú\"\n}"
+              "raw": "{\n  \"fullName\": \"Nguyen Van A Updated\",\n  \"job\": \"Giam doc\",\n  \"status\": \"Tạm trú\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/residents/:id",
@@ -206,12 +167,7 @@
           "name": "Delete Resident",
           "request": {
             "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/residents/:id",
               "host": ["{{baseUrl}}"],
@@ -237,19 +193,15 @@
           "name": "Create Apartment",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"P101\",\n  \"area\": 80.5,\n  \"apartmentNumber\": \"101\",\n  \"building\": \"A\"\n}"
+              "raw": "{\n  \"name\": \"P101\",\n  \"area\": 80.5,\n  \"apartmentNumber\": \"101\",\n  \"building\": \"A\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/api/apartments",
@@ -261,29 +213,191 @@
           "response": []
         },
         {
-          "name": "Create Apartment with Owner",
+          "name": "Get Apartment Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/apartments/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "apartments", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "APARTMENT_ID_HERE",
+                  "description": "Apartment MongoDB ObjectId"
+                }
+              ]
+            },
+            "description": "Get detailed info including owner and members"
+          },
+          "response": []
+        },
+        {
+          "name": "Add Member to Apartment",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"P102\",\n  \"area\": 95.0,\n  \"ownerId\": \"RESIDENT_ID_HERE\",\n  \"apartmentNumber\": \"102\",\n  \"building\": \"A\"\n}"
+              "raw": "{\n  \"residentId\": \"RESIDENT_ID_HERE\",\n  \"role\": \"Thành viên\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/apartments",
+              "raw": "{{baseUrl}}/api/apartments/:id/members",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "apartments"]
+              "path": ["api", "apartments", ":id", "members"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "APARTMENT_ID_HERE",
+                  "description": "Apartment MongoDB ObjectId"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Fees",
+      "item": [
+        {
+          "name": "Create Fee",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Phí dịch vụ tháng 12/2025\",\n  \"description\": \"Thu phí dịch vụ chung cư...\",\n  \"type\": \"Service\",\n  \"amount\": 5000,\n  \"unit\": \"m2\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
-            "description": "Create apartment with owner assigned"
+            "url": {
+              "raw": "{{baseUrl}}/api/fees",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "fees"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Fees List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/fees?type=Service",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "fees"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "Service",
+                  "description": "Optional: Service or Contribution"
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Limit results"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Fee Payment Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/fees/:id/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "fees", ":id", "status"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "FEE_ID_HERE",
+                  "description": "Fee ID"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Transactions",
+      "item": [
+        {
+          "name": "Calculate Fee",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"apartmentId\": \"APARTMENT_ID_HERE\",\n  \"feeId\": \"FEE_ID_HERE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions/calculate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions", "calculate"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Record Payment (Create Transaction)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"apartmentId\": \"APARTMENT_ID_HERE\",\n  \"feeId\": \"FEE_ID_HERE\",\n  \"totalAmount\": 500000,\n  \"payerName\": \"Nguyen Van A\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Stats",
+      "item": [
+        {
+          "name": "Get Dashboard Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/stats/dashboard",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "stats", "dashboard"]
+            }
           },
           "response": []
         }
@@ -317,4 +431,3 @@
     }
   ]
 }
-

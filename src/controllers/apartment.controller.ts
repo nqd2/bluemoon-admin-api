@@ -206,3 +206,46 @@ export const addMember = async (req: Request, res: Response, next: NextFunction)
   }
 };
 
+/**
+ * Get Apartment Details
+ * Lấy thông tin chi tiết của một căn hộ, bao gồm chủ hộ và danh sách thành viên
+ * 
+ * @route   GET /api/apartments/:id
+ * @access  Private (requires authentication)
+ */
+export const getApartmentDetails = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    // Validate MongoDB ObjectId
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid apartment ID format'
+      });
+      return;
+    }
+
+    // Find apartment and populate owner and members
+    const apartment = await Apartment.findById(id)
+      .populate('ownerId', 'fullName identityCard phone email dob gender hometown job')
+      .populate('members', 'fullName identityCard items dob gender relationship roleInApartment');
+
+    if (!apartment) {
+      res.status(404).json({
+        success: false,
+        message: 'Apartment not found'
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      data: apartment
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
