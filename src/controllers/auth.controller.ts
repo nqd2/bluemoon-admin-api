@@ -3,42 +3,101 @@ import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 import User from '../models/user.model';
 
-const generateToken = (id: string) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET || 'abc123456', {
-    expiresIn: '30d',
-  });
+/**
+ * Generate JWT Token
+ * @param id - User ID
+ * @param email - User email
+ * @param role - User role
+ * @returns JWT token string
+ */
+const generateToken = (id: string, email: string, role: string): string => {
+  if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET is not defined in environment variables');
+  }
+  
+  return jwt.sign(
+    { id, email, role }, 
+    process.env.JWT_SECRET, 
+    {
+      expiresIn: process.env.JWT_EXPIRE || '30d',
+    }
+  );
 };
 
+/**
+ * @route   POST /api/auth/login
+ * @desc    Authenticate user & get token
+ * @access  Public
+ */
 export const loginUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { email, password } = req.body;
 
-    // Zod Schema
+    // Validation Schema with Zod
     const loginSchema = z.object({
-      email: z.string().email(),
-      password: z.string().min(1),
+      email: z.string({
+        required_error: 'Email is required'
+      }).email('Invalid email format'),
+      password: z.string({
+        required_error: 'Password is required'
+      }).min(1, 'Password cannot be empty'),
     });
 
+    // Validate input
     const validation = loginSchema.safeParse({ email, password });
 
     if (!validation.success) {
-       res.status(400);
-       throw new Error('Invalid email or password format');
-    }
-
-    const user = await User.findOne({ email });
-
-    if (user && (await user.matchPassword(password))) {
-      res.json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        token: generateToken(user._id.toString()),
+      res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: validation.error.errors.map(err => ({
+          field: err.path[0],
+          message: err.message
+        }))
       });
-    } else {
-      res.status(401);
-      throw new Error('Invalid email or password');
+      return;
     }
+
+    // Find user by email (case-insensitive)
+    const user = await User.findOne({ email: email.toLowerCase() });
+
+    if (!user) {
+      res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+      return;
+    }
+
+    // Verify password
+    const isPasswordMatch = await user.matchPassword(password);
+
+    if (!isPasswordMatch) {
+      res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+      return;
+    }
+
+    // Generate token
+    const token = generateToken(
+      user._id.toString(), 
+      user.email,
+      user.role
+    );
+
+    // Success response
+    res.status(200).json({
+      success: true,
+      token,
+      user: {
+        _id: user._id,
+        email: user.email,
+        role: user.role
+      }
+    });
+
   } catch (error) {
     next(error);
   }
