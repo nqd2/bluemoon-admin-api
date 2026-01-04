@@ -8,7 +8,7 @@ import mongoose from 'mongoose';
 
 const userData = {
   name: 'Test Admin',
-  email: 'admin@test.com',
+  username: 'testadmin',
   password: 'password123',
   role: 'admin'
 };

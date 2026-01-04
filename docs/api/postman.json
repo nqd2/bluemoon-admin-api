@@ -3,7 +3,7 @@
     "name": "BlueMoon Admin API",
     "description": "API Collection for BlueMoon Apartment Management System",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "version": "1.1.0"
+    "version": "1.2.0"
   },
   "variable": [
     {
@@ -62,7 +62,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@test.com\",\n  \"password\": \"password123\"\n}"
+              "raw": "{\n  \"username\": \"rootadmin\",\n  \"password\": \"rootadmin123\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/auth/login",
@@ -70,6 +70,107 @@
               "path": ["api", "auth", "login"]
             },
             "description": "Admin login - returns JWT token"
+          },
+          "response": []
+        },
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('token', jsonData.token);",
+                  "    console.log('Token saved:', jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"newadmin\",\n  \"password\": \"password123\",\n  \"code\": \"ADMIN-INIT-2025\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Register new user with code"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Registration Codes",
+      "item": [
+        {
+          "name": "Create Code",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"admin\",\n  \"usageLimit\": 5,\n  \"expiresIntermsOfHours\": 48\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/registration-codes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "registration-codes"]
+            },
+            "description": "Create a new registration code (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "List Codes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/registration-codes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "registration-codes"]
+            },
+            "description": "List all registration codes"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Code",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/registration-codes/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "registration-codes", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "CODE_ID_HERE",
+                  "description": "Code ID"
+                }
+              ]
+            },
+            "description": "Revoke a registration code"
           },
           "response": []
         }

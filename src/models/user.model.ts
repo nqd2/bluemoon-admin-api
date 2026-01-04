@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs';
  * Represents an account in the system (Admin, Leader, Resident)
  */
 export interface IUser extends Document {
-  email: string;
+  username: string;
   password: string;
   role: 'admin' | 'leader' | 'resident';
   matchPassword(enteredPassword: string): Promise<boolean>;
@@ -14,13 +14,12 @@ export interface IUser extends Document {
 
 const UserSchema: Schema = new Schema(
   {
-    email: { 
+    username: { 
       type: String, 
-      required: [true, 'Email is required'],
+      required: [true, 'Username is required'],
       unique: true,
-      lowercase: true,
       trim: true,
-      match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email']
+      minlength: [6, 'Username must be at least 6 characters']
     },
     password: { 
       type: String, 

@@ -1,0 +1,50 @@
+@startuml
+title Resident Management Flows
+
+actor "Admin" as User
+participant "Frontend" as FE
+participant "Backend API" as BE
+database "MongoDB" as DB
+
+== Create Resident (Thêm nhân khẩu) ==
+User -> FE: Nhập thông tin nhân khẩu & Submit
+activate FE
+FE -> BE: POST /api/residents\n{fullName, identityCard, ...}
+activate BE
+BE -> DB: Check exists identityCard
+activate DB
+DB --> BE: Result
+deactivate DB
+
+alt Identity Card Exists
+    BE --> FE: 409 Conflict\n"Identity card already exists"
+else Unique
+    BE -> DB: Insert Resident
+    activate DB
+    DB --> BE: Created Resident
+    deactivate DB
+    BE --> FE: 201 Created
+end
+deactivate BE
+FE -> User: Show Success Toast
+deactivate FE
+
+== Get Residents List (Xem danh sách) ==
+User -> FE: View Resident Page
+activate FE
+FE -> BE: GET /api/residents?page=1&limit=10
+activate BE
+BE -> DB: Find Residents (Example: Skip 0, Limit 10)
+activate DB
+DB --> BE: Array[Residents]
+deactivate DB
+BE -> DB: Count Total Residents
+activate DB
+DB --> BE: Total Count
+deactivate DB
+BE --> FE: 200 OK\n{ data, pagination: {page, limit, total} }
+deactivate BE
+FE -> User: Display Table
+deactivate FE
+
+@enduml

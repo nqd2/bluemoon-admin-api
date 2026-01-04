@@ -1,0 +1,62 @@
+@startuml
+title Apartment Management Flows
+
+actor "Admin" as User
+participant "Frontend" as FE
+participant "Backend API" as BE
+database "MongoDB" as DB
+
+== Create Apartment (Tạo hộ khẩu mới) ==
+User -> FE: Submit Form Tạo Hộ
+activate FE
+FE -> BE: POST /api/apartments\n{name, building, area, ...}
+activate BE
+BE -> DB: Create Apartment
+activate DB
+DB --> BE: New Apartment
+deactivate DB
+BE --> FE: 201 Created
+deactivate BE
+FE -> User: Show Success
+deactivate FE
+
+== Add Member to Apartment (Thêm người vào hộ) ==
+User -> FE: Select Resident & Role -> Add
+activate FE
+FE -> BE: POST /api/apartments/:id/members\n{ residentId, role }
+activate BE
+
+BE -> DB: Find Apartment by ID
+activate DB
+DB --> BE: Apartment Data
+deactivate DB
+
+BE -> DB: Find Resident by ID
+activate DB
+DB --> BE: Resident Data
+deactivate DB
+
+alt Validations
+    BE -> BE: Check if Resident is already in an Apartment
+    
+    alt Resident Available
+        BE -> DB: Update Apartment\n($push: { members: {residentId, role} })
+        activate DB
+        DB --> BE: Updated Apartment
+        deactivate DB
+        
+        BE -> DB: Update Resident Status\n(status = 'Thường trú')
+        activate DB
+        DB --> BE: Success
+        deactivate DB
+
+        BE --> FE: 200 OK
+    else Resident Already In Another Apt
+        BE --> FE: 400 Bad Request\n"Resident belongs to another apartment"
+    end
+end
+deactivate BE
+FE -> User: Update Member List
+deactivate FE
+
+@enduml

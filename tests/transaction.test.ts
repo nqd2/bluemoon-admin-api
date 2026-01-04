@@ -7,7 +7,7 @@ import Transaction from '../src/models/transaction.model';
 import jwt from 'jsonwebtoken';
 
 const adminUser = {
-  email: 'admin@test.com',
+  username: 'adminuser',
   password: 'password123',
   role: 'admin'
 };

@@ -1,0 +1,46 @@
+@startuml
+title Authentication Flow (Admin Login)
+
+actor "Admin" as User
+participant "Frontend (Next.js)" as FE
+participant "Backend API (Express)" as BE
+database "MongoDB" as DB
+
+== Login Process ==
+User -> FE: Nhập Email/Password và Click Login
+activate FE
+FE -> BE: POST /api/auth/login\n{email, password}
+activate BE
+
+BE -> BE: Validate Input (Zod)
+alt Input Invalid
+    BE --> FE: 400 Bad Request
+else Input Valid
+    BE -> DB: Find User by Email
+    activate DB
+    DB --> BE: User Data or Null
+    deactivate DB
+
+    alt User Not Found
+        BE --> FE: 401 Unauthorized\n"Invalid credentials"
+    else User Found
+        BE -> BE: Compare Password (bcrypt)
+        alt Password Mismatch
+            BE --> FE: 401 Unauthorized\n"Invalid credentials"
+        else Password Match
+            BE -> BE: Generate JWT Token
+            BE --> FE: 200 OK\n{ token, user: {id, email, role} }
+        end
+    end
+end
+deactivate BE
+
+alt Login Success
+    FE -> FE: Store Token (Cookie/Storage)
+    FE -> User: Redirect to Dashboard
+else Login Failed
+    FE -> User: Show Error Message
+end
+deactivate FE
+
+@enduml

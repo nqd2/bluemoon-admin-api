@@ -1,0 +1,76 @@
+@startuml
+title Fee & Payment Flows
+
+actor "Admin" as User
+participant "Frontend" as FE
+participant "Backend API" as BE
+database "MongoDB" as DB
+
+== Create Fee (Tạo khoản thu) ==
+User -> FE: Create New Fee (Service/Contribution)
+activate FE
+FE -> BE: POST /api/fees
+activate BE
+BE -> DB: Insert Fee
+activate DB
+DB --> BE: Fee Created
+deactivate DB
+BE --> FE: 201 Created
+deactivate BE
+deactivate FE
+
+== Calculate Transaction (Tính phí) ==
+User -> FE: Select Apartment, Fee -> Click "Calculate"
+activate FE
+FE -> BE: POST /api/transactions/calculate\n{ apartmentId, feeId }
+activate BE
+BE -> DB: Get Apartment Info (Area, etc.)
+activate DB
+DB --> BE: Apartment Data
+deactivate DB
+BE -> DB: Get Fee Info (Unit Price, Formula)
+activate DB
+DB --> BE: Fee Data
+deactivate DB
+
+BE -> BE: Calculate Amount\n(e.g., Area * UnitPrice)
+BE --> FE: 200 OK\n{ totalAmount: 500000 }
+deactivate BE
+FE -> User: Show Amount
+deactivate FE
+
+== Record Transaction (Ghi nhận đóng tiền) ==
+User -> FE: Confirm Payment (Amount, Payer)
+activate FE
+FE -> BE: POST /api/transactions
+activate BE
+BE -> DB: Create Transaction Document
+activate DB
+DB --> BE: Transaction ID
+deactivate DB
+BE --> FE: 201 Created
+deactivate BE
+FE -> User: Payment Success
+deactivate FE
+
+== Check Fee Status (Thống kê tình trạng) ==
+User -> FE: View Fee Status Detail
+activate FE
+FE -> BE: GET /api/fees/:id/status
+activate BE
+note right of BE
+  Aggregation Logic:
+  1. Get All Apartments
+  2. Get Transactions for this Fee
+  3. Map/Merge to find who paid vs unpaid
+end note
+BE -> DB: Aggregate Query (Apartments + Transactions)
+activate DB
+DB --> BE: Fee Status Report
+deactivate DB
+BE --> FE: 200 OK\n{ feeInfo, apartments: [{status: PAID/UNPAID}, ...] }
+deactivate BE
+FE -> User: Display Status Table
+deactivate FE
+
+@enduml
