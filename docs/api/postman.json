@@ -241,7 +241,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"fullName\": \"Nguyen Van A Updated\",\n  \"job\": \"Giam doc\",\n  \"status\": \"Tạm trú\"\n}",
+              "raw": "{\n  \"fullName\": \"Nguyen Van A Updated\",\n  \"job\": \"Giam doc\",\n  \"status\": \"Tạm trú\",\n  \"apartmentId\": \"APARTMENT_ID_HERE\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -310,6 +310,38 @@
               "path": ["api", "apartments"]
             },
             "description": "Create a new apartment"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Apartments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/apartments?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "apartments"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                },
+                {
+                  "key": "building",
+                  "value": "",
+                  "description": "Optional: Filter by building code",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get paginated list of all apartments"
           },
           "response": []
         },

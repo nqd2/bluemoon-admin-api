@@ -206,6 +206,46 @@ export const addMember = async (req: Request, res: Response, next: NextFunction)
   }
 };
 
+
+/**
+ * Get All Apartments
+ * Lấy danh sách tất cả căn hộ
+ * 
+ * @route   GET /api/apartments
+ * @access  Private (requires authentication)
+ */
+export const getApartments = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const building = req.query.building as string;
+    
+    const filter: any = {};
+    if (building) {
+      filter.building = building;
+    }
+
+    const count = await Apartment.countDocuments(filter);
+    
+    // Sort by createdAt desc
+    const apartments = await Apartment.find(filter)
+      .limit(limit)
+      .skip(limit * (page - 1))
+      .sort({ createdAt: -1 })
+      .populate('ownerId', 'fullName identityCard phone'); // Populate owner info
+
+    res.status(200).json({
+      success: true,
+      data: apartments,
+      page,
+      pages: Math.ceil(count / limit),
+      total: count
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 /**
  * Get Apartment Details
  * Lấy thông tin chi tiết của một căn hộ, bao gồm chủ hộ và danh sách thành viên
