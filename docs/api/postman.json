@@ -3,7 +3,7 @@
     "name": "BlueMoon Admin API",
     "description": "API Collection for BlueMoon Apartment Management System",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "version": "1.2.0"
+    "version": "1.2.1"
   },
   "variable": [
     {
