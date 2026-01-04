@@ -50,6 +50,9 @@ describe('Stats API', () => {
       expect(res.status).toBe(200);
       expect(res.body.data.totalApartments).toBe(1);
       expect(res.body.data.totalRevenue).toBe(1000);
+      expect(res.body.data.apartmentStats.total).toBe(1);
+      expect(res.body.data.apartmentStats.status).toHaveLength(1); // Only vacant as ownerId is null
+      expect(res.body.data.apartmentStats.status[0].status).toBe('Vacant');
     });
   });
 });

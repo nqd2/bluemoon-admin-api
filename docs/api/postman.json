@@ -496,9 +496,9 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/stats/dashboard",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "stats", "dashboard"]
-            }
+              "host": ["{{baseUrl}}"]
+            },
+            "description": "Get dashboard stats including residents, apartment status, revenue, and transaction history"
           },
           "response": []
         }

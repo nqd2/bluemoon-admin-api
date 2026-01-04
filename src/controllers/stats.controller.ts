@@ -11,7 +11,7 @@ export const getDashboardStats = async (req: Request, res: Response, next: NextF
   try {
     const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
     
-    const [totalResidents, totalApartments, totalRevenueData, monthlyRevenueData, recentTransactions] = await Promise.all([
+    const [totalResidents, totalApartments, totalRevenueData, monthlyRevenueData, recentTransactions, apartmentStatus, buildingDistribution] = await Promise.all([
       // 1. Total Residents (excluding moved out)
       Resident.countDocuments({ status: { $ne: 'Đã chuyển đi' } }),
       
@@ -34,7 +34,28 @@ export const getDashboardStats = async (req: Request, res: Response, next: NextF
         .sort({ date: -1 })
         .limit(5)
         .populate('apartmentId', 'name')
-        .populate('feeId', 'title')
+        .populate('feeId', 'title'),
+        
+      // 6. Apartment Status (Occupied vs Vacant based on owner existence)
+      Apartment.aggregate([
+        {
+          $group: {
+            _id: { $cond: [{ $ifNull: ["$ownerId", false] }, "Occupied", "Vacant"] },
+            count: { $sum: 1 }
+          }
+        }
+      ]),
+      
+      // 7. Building Distribution
+      Apartment.aggregate([
+        {
+          $group: {
+            _id: "$building",
+            count: { $sum: 1 }
+          }
+        },
+        { $sort: { _id: 1 } }
+      ])
     ]);
 
     const totalRevenue = totalRevenueData.length > 0 ? totalRevenueData[0].total : 0;
@@ -48,6 +69,13 @@ export const getDashboardStats = async (req: Request, res: Response, next: NextF
       date: t.date
     }));
 
+    // Format apartment stats
+    const statsApartment = {
+      total: totalApartments,
+      status: apartmentStatus.map((s: any) => ({ status: s._id, count: s.count })),
+      byBuilding: buildingDistribution.map((b: any) => ({ building: b._id || 'Unknown', count: b.count }))
+    };
+
     res.status(200).json({
       success: true,
       data: {
@@ -55,7 +83,8 @@ export const getDashboardStats = async (req: Request, res: Response, next: NextF
         totalApartments,
         totalRevenue,
         currentMonthRevenue,
-        recentTransactions: formattedTransactions
+        recentTransactions: formattedTransactions,
+        apartmentStats: statsApartment
       }
     });
 
