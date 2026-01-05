@@ -8,7 +8,13 @@
     "dev": "nodemon src/server.ts",
     "build": "tsc",
     "lint": "echo \"Add ESLint later\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "seed:all": "ts-node scripts/seed-all.ts",
+    "seed:admin": "ts-node scripts/create-root-admin.ts",
+    "seed:fees": "ts-node src/scripts/init-fees.ts",
+    "seed:residents": "ts-node scripts/seed-residents-apartments.ts",
+    "seed:transactions": "ts-node scripts/generate-random-fees.ts",
+    "seed:simulate": "ts-node scripts/simulate-activity.ts"
   },
   "repository": {
     "type": "git",
