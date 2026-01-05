@@ -1,0 +1,52 @@
+@startuml Use_Case_Diagram
+left to right direction
+actor "Quản Trị Viên (Admin)" as Admin
+actor "Tổ Trưởng (SubLeader)" as Leader
+actor "Kế Toán (Accountant)" as Accountant
+
+rectangle "Hệ Thống Quản Lý Chung Cư BlueMoon" {
+  
+  ' Authentication & Users
+  usecase "Đăng Nhập" as UC_Login
+  usecase "Đăng Ký Tài Khoản" as UC_Register
+  usecase "Quản Lý Người Dùng (Users)" as UC_Manage_Users
+  usecase "Quản Lý Mã Đăng Ký (Codes)" as UC_Manage_Codes
+
+  ' Residents & Apartments
+  usecase "Quản Lý Nhân Khẩu" as UC_Manage_Residents
+  usecase "Quản Lý Hộ Khẩu" as UC_Manage_Apartments
+  usecase "Xem Danh Sách Nhân Khẩu/Hộ Khẩu" as UC_View_Residents_Apartments
+  usecase "Xem Hóa Đơn Hàng Tháng" as UC_View_Bills
+
+  ' Fees & Transactions
+  usecase "Quản Lý Khoản Thu (Fees)" as UC_Manage_Fees
+  usecase "Tạo Giao Dịch Thu Phí (Transactions)" as UC_Create_Transactions
+  usecase "Xem Thống Kê Doanh Thu" as UC_View_Stats
+
+}
+
+' Relationships
+Admin --> UC_Login
+Admin --> UC_Register
+Admin --> UC_Manage_Users
+Admin --> UC_Manage_Codes
+Admin --> UC_Manage_Residents
+Admin --> UC_Manage_Apartments
+Admin --> UC_Manage_Fees
+Admin --> UC_Create_Transactions
+Admin --> UC_View_Stats
+
+Admin --> UC_View_Bills
+
+Leader --> UC_Login
+Leader --> UC_Manage_Residents
+Leader --> UC_Manage_Apartments
+Leader --> UC_View_Residents_Apartments
+Leader --> UC_View_Bills
+
+Accountant --> UC_Login
+Accountant --> UC_Manage_Fees
+Accountant --> UC_Create_Transactions
+Accountant --> UC_View_Stats
+
+@enduml

@@ -1,0 +1,28 @@
+@startuml System_Architecture
+
+package "Backend" {
+  [Express Server]
+  [Auth Middleware]
+  [Routes]
+  [Controllers]
+  [Mongoose Models]
+}
+
+package "Database" {
+  database "MongoDB" {
+    [Users]
+    [Residents]
+    [Apartments]
+    [Fees]
+    [Transactions]
+    [RegistrationCodes]
+  }
+}
+
+[Express Server] --> [Auth Middleware]
+[Auth Middleware] --> [Routes]
+[Routes] --> [Controllers]
+[Controllers] --> [Mongoose Models]
+[Mongoose Models] --> "MongoDB"
+
+@enduml

@@ -1,14 +1,18 @@
 import express from 'express';
-import { createApartment, addMember, getApartmentDetails, getApartments } from '../controllers/apartment.controller';
-import { protect } from '../middlewares/auth.middleware';
+import { createApartment, addMember, getApartmentDetails, getApartments, getApartmentBills } from '../controllers/apartment.controller';
+import { protect, authorize } from '../middlewares/auth.middleware';
 
 const router = express.Router();
 
 // Protected routes - only authenticated users can access
-router.post('/', protect, createApartment);
-router.get('/', protect, getApartments);
-router.get('/:id', protect, getApartmentDetails);
-router.post('/:id/members', protect, addMember);
+router.use(protect);
+router.use(authorize('admin', 'leader'));
+
+router.post('/', createApartment);
+router.get('/', getApartments);
+router.get('/:id', getApartmentDetails);
+router.get('/:id/bills', getApartmentBills);
+router.post('/:id/members', addMember);
 
 export default router;
 

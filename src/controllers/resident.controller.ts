@@ -31,6 +31,7 @@ export const createResident = async (req: Request, res: Response, next: NextFunc
       hometown: z.string().min(1, 'Hometown is required'),
       job: z.string().min(1, 'Job is required'),
       apartmentId: z.string().optional(),
+      residencyStatus: z.enum(['Thường trú', 'Tạm trú', 'Tạm vắng']).optional(),
     });
 
     // Validate input data
@@ -41,7 +42,8 @@ export const createResident = async (req: Request, res: Response, next: NextFunc
       identityCard, 
       hometown, 
       job, 
-      apartmentId 
+      apartmentId,
+      residencyStatus: req.body.residencyStatus
     });
 
     if (!validation.success) {
@@ -76,6 +78,7 @@ export const createResident = async (req: Request, res: Response, next: NextFunc
       hometown,
       job,
       apartmentId: apartmentId || undefined,
+      residencyStatus: req.body.residencyStatus || 'Thường trú'
     });
 
     // Return success response with 201 Created
@@ -183,7 +186,8 @@ export const updateResident = async (req: Request, res: Response, next: NextFunc
       hometown: z.string().min(1, 'Hometown cannot be empty').optional(),
       job: z.string().min(1, 'Job cannot be empty').optional(),
       apartmentId: z.string().optional(),
-      status: z.string().optional(), // Support status field like "Tạm trú"
+      status: z.string().optional(), // Deprecated support status field like "Tạm trú"
+      residencyStatus: z.enum(['Thường trú', 'Tạm trú', 'Tạm vắng']).optional(),
     });
 
     // Validate update data

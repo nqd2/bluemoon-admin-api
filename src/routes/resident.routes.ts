@@ -10,9 +10,12 @@ import { protect, authorize } from '../middlewares/auth.middleware';
 const router = express.Router();
 
 // Protected routes - only authenticated users can access
-router.post('/', protect, createResident);
-router.get('/', protect, getResidents);
-router.put('/:id', protect, updateResident);
-router.delete('/:id', protect, deleteResident);
+router.use(protect);
+router.use(authorize('admin', 'leader'));
+
+router.post('/', createResident);
+router.get('/', getResidents);
+router.put('/:id', updateResident);
+router.delete('/:id', deleteResident);
 
 export default router;

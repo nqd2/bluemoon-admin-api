@@ -113,3 +113,45 @@ export const getFeePaymentStatus = async (req: Request, res: Response, next: Nex
     next(error);
   }
 };
+
+/**
+ * Update Fee (Patch Unit)
+ * @route PATCH /api/fees/:id
+ * @access Admin/Accountant
+ */
+export const updateFee = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { unit, amount, title, description, isActive } = req.body;
+
+    // Check if fee exists
+    const fee = await Fee.findById(id);
+    if (!fee) {
+      res.status(404).json({ success: false, message: 'Fee not found' });
+      return;
+    }
+
+    // Validation for unit if provided
+    if (unit && !Object.values(FeeUnit).includes(unit)) {
+      res.status(400).json({ success: false, message: 'Invalid unit type' });
+      return;
+    }
+
+    // Update fields if provided
+    if (unit) fee.unit = unit;
+    if (amount !== undefined) fee.amount = amount;
+    if (title) fee.title = title;
+    if (description) fee.description = description;
+    if (isActive !== undefined) fee.isActive = isActive;
+
+    await fee.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Fee updated successfully',
+      data: fee
+    });
+  } catch (error) {
+    next(error);
+  }
+};

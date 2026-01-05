@@ -9,7 +9,8 @@ export interface IResident extends Document {
   job: string;
   apartmentId?: string;
   roleInApartment?: 'Chủ hộ' | 'Thành viên';
-  phone?: string; // Added phone based on BE-09 requirement
+  phone?: string;
+  residencyStatus?: 'Thường trú' | 'Tạm trú' | 'Tạm vắng';
 }
 
 const ResidentSchema: Schema = new Schema(
@@ -23,6 +24,12 @@ const ResidentSchema: Schema = new Schema(
     apartmentId: { type: Schema.Types.ObjectId, ref: 'Apartment' },
     roleInApartment: { type: String, enum: ['Chủ hộ', 'Thành viên'], default: 'Thành viên' },
     phone: { type: String },
+    residencyStatus: { 
+      type: String, 
+      enum: ['Thường trú', 'Tạm trú', 'Tạm vắng'], 
+      default: 'Thường trú',
+      required: true
+    },
   },
   {
     timestamps: true,

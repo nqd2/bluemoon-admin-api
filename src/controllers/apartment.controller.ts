@@ -269,7 +269,7 @@ export const getApartmentDetails = async (req: Request, res: Response, next: Nex
     // Find apartment and populate owner and members
     const apartment = await Apartment.findById(id)
       .populate('ownerId', 'fullName identityCard phone email dob gender hometown job')
-      .populate('members', 'fullName identityCard items dob gender relationship roleInApartment');
+      .populate('members', 'fullName identityCard items dob gender relationship roleInApartment job');
 
     if (!apartment) {
       res.status(404).json({
@@ -289,3 +289,76 @@ export const getApartmentDetails = async (req: Request, res: Response, next: Nex
   }
 };
 
+
+/**
+ * Get Apartment Bills
+ * Lấy danh sách các khoản phí và trạng thái thanh toán của căn hộ
+ * 
+ * @route   GET /api/apartments/:id/bills
+ * @access  Private
+ */
+
+/**
+ * Get Apartment Bills
+ * Lấy danh sách các khoản phí và trạng thái thanh toán của căn hộ
+ * Logic updated to show Pending transactions as unpaid bills.
+ * 
+ * @route   GET /api/apartments/:id/bills
+ * @access  Private
+ */
+export const getApartmentBills = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { month, year } = req.query; // Optional filter
+
+    // Validate Apartment
+    const apartment = await Apartment.findById(id);
+    if (!apartment) {
+      res.status(404).json({ success: false, message: 'Apartment not found' });
+      return;
+    }
+
+    // Get all transactions for this apartment
+    // If month/year provided, filter. If not, maybe just show Pending ones + recent History?
+    // For now, let's fetch ALL Pending bills + Paid bills for specific month if asked.
+    // Simplifying: Fetch all transactions. Frontend filters by status/date.
+    
+    const Transaction = await import('../models/transaction.model').then(m => m.default);
+    
+    let filter: any = { apartmentId: id };
+    if (month && year) {
+      filter.month = month;
+      filter.year = year;
+    }
+
+    const transactions = await Transaction.find(filter).populate('feeId').sort({ year: -1, month: -1 });
+
+    // Map to simplified bill structure
+    const bills = transactions.map(t => {
+      const fee = t.feeId as any; // Populated
+      return {
+        billId: t._id,
+        feeId: fee._id,
+        title: fee.title || 'Unknown Fee',
+        type: fee.type,
+        month: t.month,
+        year: t.year,
+        amountDue: t.totalAmount,
+        status: t.status, // Pending, Completed
+        usage: t.usage,
+        paidDate: t.status === 'Completed' ? t.date : null
+      };
+    });
+
+    res.status(200).json({
+      success: true,
+      data: {
+        apartment: apartment.name,
+        bills
+      }
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};

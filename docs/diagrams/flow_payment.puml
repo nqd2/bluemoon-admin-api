@@ -1,0 +1,18 @@
+@startuml Flow_Payment_Transaction
+actor Accountant
+participant "Frontend" as FE
+participant "API (Transaction Controller)" as API
+database "MongoDB" as DB
+
+Accountant -> FE: Select Apartment & Fee (and Usage)
+FE -> API: POST /api/transactions/calculate (usage?)
+API -> DB: Get Apartment & Fee Info
+DB -> API: Return Info
+API -> API: Calculate Total Amount
+API -> FE: Return Calculation
+Accountant -> FE: Confirm Payment
+FE -> API: POST /api/transactions
+API -> DB: Save Transaction
+DB -> API: Success
+API -> FE: Return Transaction Receipt
+@enduml

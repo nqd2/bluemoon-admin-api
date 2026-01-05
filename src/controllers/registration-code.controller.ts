@@ -21,7 +21,7 @@ export const createRegistrationCode = async (req: Request, res: Response, next: 
     const { type, usageLimit, expiresIntermsOfHours } = req.body;
 
     const schema = z.object({
-      type: z.enum(['admin', 'leader', 'resident']),
+      type: z.enum(['admin', 'leader', 'accountant']),
       usageLimit: z.number().int().min(1).default(1),
       expiresIntermsOfHours: z.number().min(1).default(24)
     });

@@ -85,6 +85,7 @@ import feeRoutes from './routes/fee.routes';
 import transactionRoutes from './routes/transaction.routes';
 import statsRoutes from './routes/stats.routes';
 import registrationCodeRoutes from './routes/registration-code.routes';
+import userRoutes from './routes/user.routes';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/residents', residentRoutes);
@@ -93,6 +94,7 @@ app.use('/api/fees', feeRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/registration-codes', registrationCodeRoutes);
+app.use('/api/users', userRoutes);
 
 // Error Handlers
 app.use(notFound);

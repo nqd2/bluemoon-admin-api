@@ -394,6 +394,27 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Get Apartment Bills",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/apartments/:id/bills",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "apartments", ":id", "bills"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "APARTMENT_ID_HERE",
+                  "description": "Apartment ID"
+                }
+              ]
+            },
+            "description": "Get monthly bills and payment status for an apartment"
+          },
+          "response": []
         }
       ]
     },
@@ -466,6 +487,35 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Update Fee (Patch)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unit\": \"kWh\",\n  \"amount\": 3000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/fees/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "fees", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "FEE_ID_HERE",
+                  "description": "Fee ID"
+                }
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -513,6 +563,111 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "transactions"]
             }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "User Management",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                }
+              ]
+            },
+            "description": "Get all users (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"newuser\",\n  \"password\": \"password123\",\n  \"role\": \"leader\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"]
+            },
+            "description": "Create a new user directly (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Role",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"accountant\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "USER_ID_HERE",
+                  "description": "User ID"
+                }
+              ]
+            },
+            "description": "Update user role (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "USER_ID_HERE",
+                  "description": "User ID"
+                }
+              ]
+            },
+            "description": "Delete a user (Admin only)"
           },
           "response": []
         }

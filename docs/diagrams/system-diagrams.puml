@@ -1,0 +1,191 @@
+@startuml System_Architecture
+
+package "Backend" {
+  [Express Server]
+  [Auth Middleware]
+  [Routes]
+  [Controllers]
+  [Mongoose Models]
+}
+
+package "Database" {
+  database "MongoDB" {
+    [Users]
+    [Residents]
+    [Apartments]
+    [Fees]
+    [Transactions]
+    [RegistrationCodes]
+  }
+}
+
+[Express Server] --> [Auth Middleware]
+[Auth Middleware] --> [Routes]
+[Routes] --> [Controllers]
+[Controllers] --> [Mongoose Models]
+[Mongoose Models] --> "MongoDB"
+
+@enduml
+
+@startuml Use_Case_Diagram
+left to right direction
+actor "Quản Trị Viên (Admin)" as Admin
+actor "Tổ Trưởng (SubLeader)" as Leader
+actor "Kế Toán (Accountant)" as Accountant
+
+rectangle "Hệ Thống Quản Lý Chung Cư BlueMoon" {
+  
+  ' Authentication & Users
+  usecase "Đăng Nhập" as UC_Login
+  usecase "Đăng Ký Tài Khoản" as UC_Register
+  usecase "Quản Lý Người Dùng (Users)" as UC_Manage_Users
+  usecase "Quản Lý Mã Đăng Ký (Codes)" as UC_Manage_Codes
+
+  ' Residents & Apartments
+  usecase "Quản Lý Nhân Khẩu" as UC_Manage_Residents
+  usecase "Quản Lý Hộ Khẩu" as UC_Manage_Apartments
+  usecase "Xem Danh Sách Nhân Khẩu/Hộ Khẩu" as UC_View_Residents_Apartments
+
+  ' Fees & Transactions
+  usecase "Quản Lý Khoản Thu (Fees)" as UC_Manage_Fees
+  usecase "Tạo Giao Dịch Thu Phí (Transactions)" as UC_Create_Transactions
+  usecase "Xem Thống Kê Doanh Thu" as UC_View_Stats
+
+}
+
+' Relationships
+Admin --> UC_Login
+Admin --> UC_Register
+Admin --> UC_Manage_Users
+Admin --> UC_Manage_Codes
+Admin --> UC_Manage_Residents
+Admin --> UC_Manage_Apartments
+Admin --> UC_Manage_Fees
+Admin --> UC_Create_Transactions
+Admin --> UC_View_Stats
+
+Leader --> UC_Login
+Leader --> UC_Manage_Residents
+Leader --> UC_Manage_Apartments
+Leader --> UC_View_Residents_Apartments
+
+Accountant --> UC_Login
+Accountant --> UC_Manage_Fees
+Accountant --> UC_Create_Transactions
+Accountant --> UC_View_Stats
+
+@enduml
+
+@startuml Class_Diagram
+class User {
+  +String username
+  +String password
+  +String role
+  +matchPassword()
+}
+
+class Resident {
+  +String fullName
+  +Date dob
+  +String gender
+  +String identityCard
+  +String hometown
+  +String job
+  +ObjectId apartmentId
+  +String roleInApartment
+  +String phone
+}
+
+class Apartment {
+  +String name
+  +Number area
+  +ObjectId ownerId
+  +ObjectId[] members
+  +String apartmentNumber
+  +String building
+}
+
+class Fee {
+  +String title
+  +String description
+  +String type
+  +Number amount
+  +String unit
+  +Boolean isActive
+}
+
+class Transaction {
+  +ObjectId apartmentId
+  +ObjectId feeId
+  +Number totalAmount
+  +String payerName
+  +ObjectId createdBy
+  +Date date
+}
+
+class RegistrationCode {
+  +String code
+  +String type
+  +Number usageLimit
+  +Number usageCount
+  +Date expiresAt
+  +ObjectId createdBy
+  +isValid()
+}
+
+User "1" -- "*" RegistrationCode : creates
+User "1" -- "*" Transaction : records
+Apartment "1" -- "1" Resident : owner
+Apartment "1" -- "*" Resident : members
+Apartment "1" -- "*" Transaction : pays
+Fee "1" -- "*" Transaction : has
+Resident "1" -- "0..1" Apartment : lives in
+
+@enduml
+
+@startuml Flow_Seed_Data
+start
+:Run Script (seed-residents-apartments.ts);
+:Login as Admin;
+if (Login Success?) then (yes)
+  :Fetch Existing Residents;
+  :Loop Residents Data;
+  if (Resident Exists?) then (yes)
+    :Skip Creation;
+  else (no)
+    :Create Resident (API);
+  endif
+  :Loop Apartments Config;
+  if (Apartment Exists?) then (yes)
+    :Skip Creation;
+  else (no)
+    :Create Apartment (API);
+    :Assign Owner (API);
+    :Assign Members (API);
+  endif
+  :Fetch Dashboard Stats;
+  :Display Summary;
+else (no)
+  :Error & Exit;
+endif
+stop
+@enduml
+
+@startuml Flow_Payment_Transaction
+actor Accountant
+participant "Frontend" as FE
+participant "API (Transaction Controller)" as API
+database "MongoDB" as DB
+
+Accountant -> FE: Select Apartment & Fee
+FE -> API: POST /api/transactions/calculate
+API -> DB: Get Apartment & Fee Info
+DB -> API: Return Info
+API -> API: Calculate Total Amount
+API -> FE: Return Calculation
+Accountant -> FE: Confirm Payment
+FE -> API: POST /api/transactions
+API -> DB: Save Transaction
+DB -> API: Success
+API -> FE: Return Transaction Receipt
+@enduml

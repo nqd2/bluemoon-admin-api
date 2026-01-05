@@ -6,7 +6,7 @@ import mongoose, { Schema, Document } from 'mongoose';
  */
 export interface IRegistrationCode extends Document {
   code: string;
-  type: 'admin' | 'leader' | 'resident';
+  type: 'admin' | 'leader' | 'accountant';
   usageLimit: number;
   usageCount: number;
   expiresAt: Date;
@@ -27,7 +27,7 @@ const RegistrationCodeSchema: Schema = new Schema(
     },
     type: {
       type: String,
-      enum: ['admin', 'leader', 'resident'],
+      enum: ['admin', 'leader', 'accountant'],
       required: true
     },
     usageLimit: {

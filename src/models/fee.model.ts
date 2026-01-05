@@ -2,13 +2,16 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export enum FeeType {
   Service = 'Service',
-  Contribution = 'Contribution'
+  Contribution = 'Contribution',
+  Utility = 'Utility'
 }
 
 export enum FeeUnit {
   Apartment = 'hộ',
   Person = 'khẩu',
-  Area = 'm2'
+  Area = 'm2',
+  KWh = 'kWh',
+  WaterCube = 'm3'
 }
 
 export interface IFee extends Document {

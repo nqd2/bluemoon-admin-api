@@ -47,6 +47,12 @@ export const calculateFee = async (req: Request, res: Response, next: NextFuncti
         quantity = 1;
         totalAmount = fee.amount;
         break;
+      case FeeUnit.KWh:
+      case FeeUnit.WaterCube:
+        // For utility, usage is provided in request body
+        quantity = Number(req.body.usage) || 0;
+        totalAmount = fee.amount * quantity;
+        break;
     }
 
     // For Contribution, amount might be voluntary (0 or suggested).
@@ -107,7 +113,9 @@ export const createTransaction = async (req: Request, res: Response, next: NextF
       totalAmount,
       payerName,
       createdBy: userId,
-      date: new Date()
+      date: new Date(),
+      usage: req.body.usage,
+      unitPrice: req.body.unitPrice
     });
 
     res.status(201).json({
@@ -115,6 +123,96 @@ export const createTransaction = async (req: Request, res: Response, next: NextF
       message: 'Transaction recorded successfully',
       data: transaction
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Generate Monthly Bills
+ * @route POST /api/transactions/generate-bills
+ */
+export const generateMonthlyBills = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { month, year } = req.body;
+    
+    // 1. Get List of Active Fees
+    const fees = await Fee.find({ isActive: true });
+    
+    // 2. Get All Apartments
+    const apartments = await Apartment.find().populate('members');
+
+    const createdTransactions = [];
+    const errors = [];
+
+    for (const apartment of apartments) {
+      for (const fee of fees) {
+        try {
+           // Check if bill already exists
+           const existing = await Transaction.findOne({
+             apartmentId: apartment._id,
+             feeId: fee._id,
+             month,
+             year
+           });
+
+           if (existing) continue;
+
+           let quantity = 0;
+           let totalAmount = 0;
+           let usage = 0;
+
+           // SIMULATION: Random usage
+           switch (fee.unit) {
+             case FeeUnit.Area:
+               quantity = apartment.area;
+               totalAmount = fee.amount * apartment.area;
+               break;
+             case FeeUnit.Person:
+               quantity = apartment.members ? apartment.members.length : 0;
+               totalAmount = fee.amount * quantity;
+               break;
+             case FeeUnit.Apartment:
+               quantity = 1;
+               totalAmount = fee.amount;
+               break;
+             case FeeUnit.KWh:
+             case FeeUnit.WaterCube:
+               usage = fee.unit === FeeUnit.KWh 
+                 ? Math.floor(Math.random() * 150) + 50 
+                 : Math.floor(Math.random() * 20) + 10;
+               quantity = usage;
+               totalAmount = fee.amount * usage;
+               break;
+           }
+
+           // Create PENDING Transaction (Bill)
+           const trans = await Transaction.create({
+             apartmentId: apartment._id,
+             feeId: fee._id,
+             month,
+             year,
+             status: 'Pending',
+             totalAmount,
+             usage: usage > 0 ? usage : undefined,
+             unitPrice: fee.amount,
+             date: new Date()
+           });
+
+           createdTransactions.push(trans);
+
+        } catch (err: any) {
+          errors.push({ apartment: apartment.name, fee: fee.title, error: err.message });
+        }
+      }
+    }
+
+    res.status(201).json({
+      success: true,
+      message: `Generated ${createdTransactions.length} bills.`,
+      errors: errors.length > 0 ? errors : undefined
+    });
+
   } catch (error) {
     next(error);
   }

@@ -1,0 +1,27 @@
+@startuml Flow_Seed_Data
+start
+:Run Script (seed-residents-apartments.ts);
+:Login as Admin;
+if (Login Success?) then (yes)
+  :Fetch Existing Residents;
+  :Loop Residents Data;
+  if (Resident Exists?) then (yes)
+    :Skip Creation;
+  else (no)
+    :Create Resident (API);
+  endif
+  :Loop Apartments Config;
+  if (Apartment Exists?) then (yes)
+    :Skip Creation;
+  else (no)
+    :Create Apartment (API);
+    :Assign Owner (API);
+    :Assign Members (API);
+  endif
+  :Fetch Dashboard Stats;
+  :Display Summary;
+else (no)
+  :Error & Exit;
+endif
+stop
+@enduml

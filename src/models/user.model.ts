@@ -8,7 +8,7 @@ import bcrypt from 'bcryptjs';
 export interface IUser extends Document {
   username: string;
   password: string;
-  role: 'admin' | 'leader' | 'resident';
+  role: 'admin' | 'leader' | 'accountant';
   matchPassword(enteredPassword: string): Promise<boolean>;
 }
 
@@ -28,7 +28,7 @@ const UserSchema: Schema = new Schema(
     },
     role: {
       type: String,
-      enum: ['admin', 'leader', 'resident'],
+      enum: ['admin', 'leader', 'vice_leader'],
       default: 'resident',
       required: true
     }
