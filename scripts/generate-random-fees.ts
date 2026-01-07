@@ -126,7 +126,7 @@ async function generateRandomFees() {
     }
 
     log('DATA', 'Fetching apartments...');
-    const apartments = await Apartment.find().populate('members');
+    const apartments = await Apartment.find();
     log('DATA', `Found ${apartments.length} apartments`);
 
     if (apartments.length === 0) {

@@ -3,7 +3,7 @@
     "name": "BlueMoon Admin API",
     "description": "API Collection for BlueMoon Apartment Management System",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "version": "1.2.1"
+    "version": "1.3.0"
   },
   "variable": [
     {
@@ -415,6 +415,27 @@
             "description": "Get monthly bills and payment status for an apartment"
           },
           "response": []
+        },
+        {
+          "name": "Calculate All Fees for Apartment",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/apartments/:id/calculate-all-fees",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "apartments", ":id", "calculate-all-fees"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "APARTMENT_ID_HERE",
+                  "description": "Apartment MongoDB ObjectId"
+                }
+              ]
+            },
+            "description": "Calculate all active fees for an apartment. Returns breakdown of all fees with total amounts and grand total."
+          },
+          "response": []
         }
       ]
     },
@@ -523,13 +544,48 @@
       "name": "Transactions",
       "item": [
         {
+          "name": "Apartments Revenue Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions/apartments-summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions", "apartments-summary"]
+            },
+            "description": "Get revenue summary for all apartments, including totalCollected and transactionCount per apartment."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Apartment Transactions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions/apartment/:apartmentId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions", "apartment", ":apartmentId"],
+              "variable": [
+                {
+                  "key": "apartmentId",
+                  "value": "APARTMENT_ID_HERE",
+                  "description": "Apartment MongoDB ObjectId"
+                }
+              ]
+            },
+            "description": "Get all transactions of a specific apartment, including populated fee info."
+          },
+          "response": []
+        },
+        {
           "name": "Calculate Fee",
           "request": {
             "method": "POST",
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"apartmentId\": \"APARTMENT_ID_HERE\",\n  \"feeId\": \"FEE_ID_HERE\"\n}",
+              "raw": "{\n  \"apartmentId\": \"APARTMENT_ID_HERE\",\n  \"feeId\": \"FEE_ID_HERE\",\n  \"usage\": 150\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -540,7 +596,31 @@
               "raw": "{{baseUrl}}/api/transactions/calculate",
               "host": ["{{baseUrl}}"],
               "path": ["api", "transactions", "calculate"]
-            }
+            },
+            "description": "Calculate fee for a single apartment and fee. Usage is optional (for kWh/m3 fees)."
+          },
+          "response": []
+        },
+        {
+          "name": "Calculate All Fees",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"apartmentId\": \"APARTMENT_ID_HERE\",\n  \"usageMap\": {\n    \"FEE_ID_1\": 150,\n    \"FEE_ID_2\": 20\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions/calculate-all",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions", "calculate-all"]
+            },
+            "description": "Calculate all active fees for an apartment. usageMap is optional - provide feeId and usage for utility fees (kWh/m3). Returns breakdown of all fees with grand total."
           },
           "response": []
         },
@@ -551,7 +631,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"apartmentId\": \"APARTMENT_ID_HERE\",\n  \"feeId\": \"FEE_ID_HERE\",\n  \"totalAmount\": 500000,\n  \"payerName\": \"Nguyen Van A\"\n}",
+              "raw": "{\n  \"apartmentId\": \"APARTMENT_ID_HERE\",\n  \"feeId\": \"FEE_ID_HERE\",\n  \"totalAmount\": 500000,\n  \"payerName\": \"Nguyen Van A\",\n  \"usage\": 150,\n  \"unitPrice\": 3000\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -562,7 +642,82 @@
               "raw": "{{baseUrl}}/api/transactions",
               "host": ["{{baseUrl}}"],
               "path": ["api", "transactions"]
-            }
+            },
+            "description": "Record a payment transaction. usage and unitPrice are optional (for utility fees)."
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Monthly Bills",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"month\": 12,\n  \"year\": 2025\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions/generate-bills",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions", "generate-bills"]
+            },
+            "description": "Generate monthly bills (Pending transactions) for all apartments and all active fees for a specific month/year. Creates bills with random usage for utility fees."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Transaction",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"totalAmount\": 600000,\n  \"payerName\": \"Updated Name\",\n  \"usage\": 160,\n  \"unitPrice\": 3200,\n  \"status\": \"Completed\",\n  \"date\": \"2025-12-25T00:00:00.000Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "TRANSACTION_ID_HERE",
+                  "description": "Transaction ID"
+                }
+              ]
+            },
+            "description": "Update a transaction (amount, payer, usage, status, date)."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Transaction",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "TRANSACTION_ID_HERE",
+                  "description": "Transaction ID"
+                }
+              ]
+            },
+            "description": "Delete a transaction."
           },
           "response": []
         }
